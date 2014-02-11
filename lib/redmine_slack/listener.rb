@@ -1,11 +1,6 @@
 require 'httpclient'
 
 class SlackListener < Redmine::Hook::Listener
-	def controller_issues_bulk_edit_after_save(context={})
-		issue = context[:issue]
-		speak context[:issue].id
-	end
-
 	def controller_issues_new_after_save(context={})
 		issue = context[:issue]
 
