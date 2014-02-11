@@ -99,6 +99,9 @@ private
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
+		when "fixed_version"
+			version = Version.find(detail.value) rescue nil
+			value = escape version.to_s
 		when "attachment"
 			attachment = Attachment.find(detail.prop_key) rescue nil
 			value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
