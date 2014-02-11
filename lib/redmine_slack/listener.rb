@@ -72,9 +72,13 @@ private
 	end
 
 	def detail_to_field(detail)
-		key = detail.prop_key.sub "_id", ""
-
-		title = I18n.t "field_#{key}"
+		if detail.property == "cf"
+			key = CustomField.find(detail.prop_key).name rescue nil
+			title = key
+		else
+			key = detail.prop_key.to_s.sub("_id", "")
+			title = I18n.t "field_#{key}"
+		end
 
 		short = true
 		value = escape detail.value.to_s
