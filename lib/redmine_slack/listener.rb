@@ -29,7 +29,7 @@ class SlackListener < Redmine::Hook::Listener
 		issue = context[:issue]
 		journal = context[:journal]
 
-		msg = "[#{escape issue.project}] #{escape issue.author} updated <#{issue_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{issue_url issue}|#{escape issue}>"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
