@@ -81,12 +81,18 @@ private
 		case key
 		when "title", "subject"
 			short = false
+		when "tracker"
+			tracker = Tracker.find(detail.value) rescue nil
+			value = escape tracker.to_s
+		when "project"
+			project = Project.find(detail.value) rescue nil
+			value = escape project.to_s
 		when "status"
-			user = IssueStatus.find(detail.value) rescue nil
-			value = escape user.to_s
+			status = IssueStatus.find(detail.value) rescue nil
+			value = escape status.to_s
 		when "priority"
-			user = IssuePriority.find(detail.value) rescue nil
-			value = escape user.to_s
+			priority = IssuePriority.find(detail.value) rescue nil
+			value = escape priority.to_s
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
