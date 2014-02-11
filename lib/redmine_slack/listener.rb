@@ -4,7 +4,7 @@ class SlackListener < Redmine::Hook::Listener
 	def controller_issues_new_after_save(context={})
 		issue = context[:issue]
 
-		msg = "[#{escape issue.project}] #{escape issue.author} created <#{issue_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>"
 
 		attachment = {}
 		attachment[:text] = escape issue.description if issue.description
@@ -29,7 +29,7 @@ class SlackListener < Redmine::Hook::Listener
 		issue = context[:issue]
 		journal = context[:journal]
 
-		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{issue_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
@@ -62,14 +62,17 @@ private
 		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
 	end
 
-	def issue_url(issue)
-		Rails.application.routes.url_for(issue.event_url :host => Setting.host_name)
+	def object_url(obj)
+		Rails.application.routes.url_for(obj.event_url :host => Setting.host_name)
 	end
 
 	def detail_to_field(detail)
 		if detail.property == "cf"
 			key = CustomField.find(detail.prop_key).name rescue nil
 			title = key
+		elsif detail.property == "attachment"
+			key = "attachment"
+			title = I18n.t :label_attachment
 		else
 			key = detail.prop_key.to_s.sub("_id", "")
 			title = I18n.t "field_#{key}"
@@ -79,7 +82,7 @@ private
 		value = escape detail.value.to_s
 
 		case key
-		when "title", "subject"
+		when "title", "subject", "description"
 			short = false
 		when "tracker"
 			tracker = Tracker.find(detail.value) rescue nil
@@ -96,7 +99,12 @@ private
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
+		when "attachment"
+			attachment = Attachment.find(detail.prop_key) rescue nil
+			value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
 		end
+
+		value = "-" if value.empty?
 
 		result = { :title => title, :value => value }
 		result[:short] = true if short
