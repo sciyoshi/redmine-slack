@@ -59,7 +59,7 @@ class SlackListener < Redmine::Hook::Listener
 
 private
 	def escape(msg)
-		CGI::escapeHTML msg.to_s
+		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
 	end
 
 	def issue_url(issue)
