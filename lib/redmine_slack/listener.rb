@@ -42,6 +42,7 @@ class SlackListener < Redmine::Hook::Listener
 		url = Setting.plugin_redmine_slack[:slack_url]
 		username = Setting.plugin_redmine_slack[:username]
 		channel = Setting.plugin_redmine_slack[:channel]
+		icon = Setting.plugin_redmine_slack[:icon]
 
 		params = {
 			:text => msg
@@ -51,6 +52,12 @@ class SlackListener < Redmine::Hook::Listener
 		params[:channel] = channel if channel
 
 		params[:attachments] = [attachment] if attachment
+
+		if not icon.empty? and icon.start_with? ':'
+			params[:icon_emoji] = icon
+		elsif not icon.empty?
+			params[:icon_url] = icon
+		end
 
 		client = HTTPClient.new
 		client.ssl_config.cert_store.set_default_paths
