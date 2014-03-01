@@ -53,10 +53,12 @@ class SlackListener < Redmine::Hook::Listener
 
 		params[:attachments] = [attachment] if attachment
 
-		if not icon.empty? and icon.start_with? ':'
-			params[:icon_emoji] = icon
-		elsif not icon.empty?
-			params[:icon_url] = icon
+		if icon and not icon.empty?
+			if icon.start_with? ':'
+				params[:icon_emoji] = icon
+			else
+				params[:icon_url] = icon
+			end
 		end
 
 		client = HTTPClient.new
