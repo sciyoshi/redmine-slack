@@ -87,11 +87,13 @@ private
 
 		val = proj.custom_value_for(cf).value rescue nil
 
-		if val.blank? and proj.parent
+		val = if val.blank? and proj.parent
 			channel_for_project proj.parent
 		elsif val.blank?
 			Setting.plugin_redmine_slack[:channel]
-		elsif not val.starts_with? '#'
+		end
+
+		if val.blank? or not val.starts_with? '#'
 			nil
 		else
 			val
