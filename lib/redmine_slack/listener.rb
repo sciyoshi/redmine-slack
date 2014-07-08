@@ -83,18 +83,20 @@ private
 	end
 
 	def channel_for_project(proj)
+		return nil if proj.blank?
+
 		cf = ProjectCustomField.find_by_name("Slack Channel")
 
-		val = proj.custom_value_for(cf).value rescue nil
+		val = [
+			(proj.custom_value_for(cf).value rescue nil),
+			(channel_for_project proj.parent),
+			Setting.plugin_redmine_slack[:channel],
+		].find{|v| v.present?}
 
-		if val.blank? and proj.parent
-			channel_for_project proj.parent
-		elsif val.blank?
-			Setting.plugin_redmine_slack[:channel]
-		elsif not val.starts_with? '#'
-			nil
-		else
+		if val.to_s.starts_with? '#'
 			val
+		else
+			nil
 		end
 	end
 
