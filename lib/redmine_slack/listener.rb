@@ -82,23 +82,22 @@ private
 		Rails.application.routes.url_for(obj.event_url({:host => Setting.host_name, :protocol => Setting.protocol}))
 	end
 
-	def channel_for_project(proj)
-		cf = ProjectCustomField.find_by_name("Slack Channel")
+        def channel_for_project(proj)
+                return nil if proj.blank?
 
-		val = proj.custom_value_for(cf).value rescue nil
+                cf = ProjectCustomField.find_by_name("Slack Channel")
+                val = [
+                        (proj.custom_value_for(cf).value rescue nil),
+                        (channel_for_project proj.parent),
+                        Setting.plugin_redmine_slack[:channel],
+                ].find{|v| v.present?}
 
-		val = if val.blank? and proj.parent
-			channel_for_project proj.parent
-		elsif val.blank?
-			Setting.plugin_redmine_slack[:channel]
-		end
-
-		if val.blank? or not val.starts_with? '#'
-			nil
-		else
-			val
-		end
-	end
+                if val.to_s.starts_with? '#'
+                        val
+                else
+                        nil
+                end
+        end
 
 	def detail_to_field(detail)
 		if detail.property == "cf"
