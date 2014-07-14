@@ -130,6 +130,9 @@ private
 		when "priority"
 			priority = IssuePriority.find(detail.value) rescue nil
 			value = escape priority.to_s
+		when "category"
+			category = IssueCategory.find(detail.value) rescue nil
+			value = escape category.to_s
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
