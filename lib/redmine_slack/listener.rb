@@ -137,6 +137,9 @@ private
 		when "attachment"
 			attachment = Attachment.find(detail.prop_key) rescue nil
 			value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
+		when "parent"
+			issue = Issue.find(detail.value) rescue nil
+			value = "<#{object_url issue}|#{escape issue}>" if issue
 		end
 
 		value = "-" if value.empty?
