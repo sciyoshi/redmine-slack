@@ -9,10 +9,9 @@ class SlackListener < Redmine::Hook::Listener
 
 		return unless channel and url
 
-		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>\n#{escape issue.description}"
 
 		attachment = {}
-		attachment[:text] = escape issue.description if issue.description
 		attachment[:fields] = [{
 			:title => I18n.t("field_status"),
 			:value => escape(issue.status.to_s),
@@ -39,10 +38,9 @@ class SlackListener < Redmine::Hook::Listener
 
 		return unless channel and url
 
-		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>\n#{escape journal.notes}"
 
 		attachment = {}
-		attachment[:text] = escape journal.notes if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
@@ -54,7 +52,8 @@ class SlackListener < Redmine::Hook::Listener
 		icon = Setting.plugin_redmine_slack[:icon]
 
 		params = {
-			:text => msg
+			:text => msg,
+			:link_names => 1,
 		}
 
 		params[:username] = username if username
