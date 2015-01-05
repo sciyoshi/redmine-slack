@@ -9,7 +9,7 @@ class SlackListener < Redmine::Hook::Listener
 
 		return unless channel and url
 
-		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions issue.description}"
 
 		attachment = {}
 		attachment[:text] = escape issue.description if issue.description
@@ -45,7 +45,7 @@ class SlackListener < Redmine::Hook::Listener
 
 		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
 
-		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
@@ -60,7 +60,8 @@ class SlackListener < Redmine::Hook::Listener
 		icon = Setting.plugin_redmine_slack[:icon]
 
 		params = {
-			:text => msg
+			:text => msg,
+			:link_names => 1,
 		}
 
 		params[:username] = username if username
@@ -173,5 +174,16 @@ private
 		result = { :title => title, :value => value }
 		result[:short] = true if short
 		result
+	end
+
+	def mentions text
+		names = extract_usernames text
+		names.present? ? "\nTo: " + names.join(', ') : nil
+	end
+
+	def extract_usernames text = ''
+		# slack usernames may only contain lowercase letters, numbers,
+		# dashes and underscores and must start with a letter or number.
+		text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
 	end
 end
