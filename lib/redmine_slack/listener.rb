@@ -27,6 +27,12 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		}]
 
+		attachment[:fields] << {
+			:title => I18n.t("field_watcher"),
+			:value => escape(issue.watcher_users.join(', ')),
+			:short => true
+		} if Setting.plugin_redmine_slack[:display_watchers] == 'yes'
+
 		speak msg, channel, attachment, url
 	end
 
