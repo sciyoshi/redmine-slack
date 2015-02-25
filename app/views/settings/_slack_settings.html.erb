@@ -22,3 +22,11 @@
 	<label for="settings_username">Slack Username</label>
 	<input type="text" id="settings_username" value="<%= settings['username'] %>" name="settings[username]" />
 </p>
+
+<p>
+	<label for="settings_display_watchers">Display Watchers?</label>
+	<select id="settings_display_watchers" value="<%= settings['display_watchers'] %>" name="settings[display_watchers]">
+		<option value="yes">Yes</option>
+		<option value="no" <%= settings['display_watchers'] != 'yes' ? %q(selected="selected") : '' %>>No</option>
+	</select>
+</p>
