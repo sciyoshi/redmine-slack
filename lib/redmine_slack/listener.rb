@@ -27,6 +27,17 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		}]
 
+		attachment[:fields] << {
+			:title => I18n.t("field_watcher"),
+			:value => escape(issue.watcher_users.join(', ')),
+			:short => true
+		} if Setting.plugin_redmine_slack[:display_watchers] == 'yes'
+
+		attachment[:fields] << {
+			:title => I18n.t("default_role_manager"),
+			:value => escape(User.find issue.custom_field_value(CustomField.where(name: 'Responsable').first)),
+			:short => true
+		}
 		speak msg, channel, attachment, url
 	end
 
@@ -148,7 +159,7 @@ private
 		when "category"
 			category = IssueCategory.find(detail.value) rescue nil
 			value = escape category.to_s
-		when "assigned_to"
+		when "assigned_to", 'Responsable'
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
 		when "fixed_version"
