@@ -70,6 +70,7 @@ class SlackListener < Redmine::Hook::Listener
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
+	end
 
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_slack[:slack_url] if not url
