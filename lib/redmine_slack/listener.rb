@@ -54,6 +54,37 @@ class SlackListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
+	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
+		issue = context[:issue]
+		journal = issue.current_journal
+		changeset = context[:changeset]
+
+		channel = channel_for_project issue.project
+		url = url_for_project issue.project
+
+		return unless channel and url and issue.save
+
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
+
+		repository = changeset.repository
+
+		revision_url = Rails.application.routes.url_for(
+			:controller => 'repositories',
+			:action => 'revision',
+			:id => repository.project,
+			:repository_id => repository.identifier_param,
+			:rev => changeset.revision,
+			:host => Setting.host_name,
+			:protocol => Setting.protocol
+		)
+
+		attachment = {}
+		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{escape changeset.comments}>")
+		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+
+		speak msg, channel, attachment, url
+	end
+
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_slack[:slack_url] if not url
 		username = Setting.plugin_redmine_slack[:username]
