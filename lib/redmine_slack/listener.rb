@@ -74,7 +74,7 @@ class SlackListener < Redmine::Hook::Listener
 		attachment[:text] = escape(ll(
 				Setting.default_language,
 				:text_status_changed_by_changeset,
-				link_to_revision(changeset.revision,changeset.repository,(:text => changeset.comments))
+				link_to_revision(changeset.revision,changeset.repository,:text => changeset.comments)
 				))
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
