@@ -62,16 +62,23 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url
-		return unless issue.changes.any?
-		return unless issue.save
+		return unless channel and url and issue.save
 
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
 
-		attachment = {}
 		repository = changeset.repository
-		# Rails.application.routes.url_for(obj.event_url({}))
-		rev_url = Rails.application.routes.url_for :controller => 'repositories', :action => 'revision', :id => repository.project, :repository_id => repository.identifier_param, :rev => changeset.revision,:host => Setting.host_name, :protocol => Setting.protocol
+
+		revision_url = Rails.application.routes.url_for(
+			:controller => 'repositories',
+			:action => 'revision',
+			:id => repository.project,
+			:repository_id => repository.identifier_param,
+			:rev => changeset.revision,
+			:host => Setting.host_name,
+			:protocol => Setting.protocol
+		)
+
+		attachment = {}
 		attachment[:text] = ll(Setting.default_language,:text_status_changed_by_changeset,"<#{rev_url}|#{escape changeset.comments}>")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
