@@ -71,8 +71,7 @@ class SlackListener < Redmine::Hook::Listener
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
 
 		attachment = {}
-		attachment[:text] = escape journal.notes if journal.notes
-		attachment[:text] += '\n\n#{changeset.comments}'
+		attachment[:text] = escape(journal.notes+"\n#{changeset.comments}") if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
