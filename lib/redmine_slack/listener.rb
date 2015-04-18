@@ -58,7 +58,7 @@ class SlackListener < Redmine::Hook::Listener
 		issue = context[:issue]
 		journal = issue.current_journal
 		changeset = context[:changeset]
-		return unless issues.changes.any?
+		return unless issue.changes.any?
 		return unless issue.save
 
 		journal.reload
