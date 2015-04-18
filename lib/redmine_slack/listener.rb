@@ -57,7 +57,7 @@ class SlackListener < Redmine::Hook::Listener
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
 		issue = context[:issue]
 		journal = issue.current_journal
-		changeset = content[:changeset]
+		changeset = context[:changeset]
 		return unless issues.changes.any?
 		return unless issue.save
 
