@@ -54,7 +54,7 @@ class SlackListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
-	def model_changeset_scan_commit_for_issue_ids_pre_issue_updat(context={})
+	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
 		issue = context[:issue]
 		journal = issue.current_journal
 
