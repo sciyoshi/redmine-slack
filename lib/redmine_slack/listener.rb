@@ -70,8 +70,8 @@ class SlackListener < Redmine::Hook::Listener
 
 		attachment = {}
 		repository = changeset.repository
-		rev_url = url_for :controller => 'repositories', :action => 'revision', :id => repository.project, :repository_id => repository.identifier_param, :rev => changeset.revision
-		attachment[:text] = ll(Settings.default_language,:text_status_changed_by_changeset,"<#{escape rev_link}|#{escape changeset.comments}")
+		#rev_url = url_for :controller => 'repositories', :action => 'revision', :id => repository.project, :repository_id => repository.identifier_param, :rev => changeset.revision
+		attachment[:text] = ll(Settings.default_language,:text_status_changed_by_changeset,"<#{object_url repository}|#{escape changeset.comments}")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
