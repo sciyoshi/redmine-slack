@@ -57,6 +57,7 @@ class SlackListener < Redmine::Hook::Listener
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
 		issue = context[:issue]
 		journal = issue.current_journal
+		changeset = content[:changeset]
 		return unless issues.changes.any?
 		return unless issue.save
 
@@ -71,6 +72,7 @@ class SlackListener < Redmine::Hook::Listener
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
+		attachment[:text] += '\n\n#{changeset.comments}'
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
