@@ -79,7 +79,7 @@ class SlackListener < Redmine::Hook::Listener
 		)
 
 		attachment = {}
-		attachment[:text] = ll(Setting.default_language,:text_status_changed_by_changeset,"<#{rev_url}|#{escape changeset.comments}>")
+		attachment[:text] = ll(Setting.default_language,:text_status_changed_by_changeset,"<#{revision_url}|#{escape changeset.comments}>")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
