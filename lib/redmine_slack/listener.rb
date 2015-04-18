@@ -70,7 +70,8 @@ class SlackListener < Redmine::Hook::Listener
 
 		attachment = {}
 		repository = changeset.repository
-		#rev_url = url_for :controller => 'repositories', :action => 'revision', :id => repository.project, :repository_id => repository.identifier_param, :rev => changeset.revision
+		# Rails.application.routes.url_for(obj.event_url({}))
+		rev_url = Rails.application.routes.url_for :controller => 'repositories', :action => 'revision', :id => repository.project, :repository_id => repository.identifier_param, :rev => changeset.revision,:host => Setting.host_name, :protocol => Setting.protocol
 		attachment[:text] = ll(Setting.default_language,:text_status_changed_by_changeset,"<#{object_url repository}|#{escape changeset.comments}")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
