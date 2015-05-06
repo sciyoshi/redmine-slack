@@ -22,3 +22,8 @@
 	<label for="settings_username">Slack Username</label>
 	<input type="text" id="settings_username" value="<%= settings['username'] %>" name="settings[username]" />
 </p>
+
+<p>
+	<label for="settings_post_updates">Post Issue Updates?</label>
+	<input type="checkbox" id="settings_post_updates" value="1" name="settings[post_updates]" <%= settings['post_updates'] ? '' : 'checked="checked"' %> />
+</p>
