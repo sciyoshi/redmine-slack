@@ -55,6 +55,7 @@ class SlackListener < Redmine::Hook::Listener
 	end
 
 	def controller_wiki_edit_after_save(context = { })
+		if Setting.plugin_redmine_slack[:post_wiki_updates] == '1' then return end
 		project = context[:project]
 		page = context[:page]
 
