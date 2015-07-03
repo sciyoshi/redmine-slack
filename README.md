@@ -9,7 +9,8 @@ channel. Improvements are welcome! Just send a pull request.
 
 ## Installation
 
-From your Redmine plugins directory, clone this repository as `redmine_slack`:
+From your Redmine plugins directory, clone this repository as `redmine_slack` (note
+the underscore!):
 
     git clone https://github.com/sciyoshi/redmine-slack.git redmine_slack
 
