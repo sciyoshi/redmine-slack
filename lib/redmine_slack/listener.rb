@@ -54,6 +54,24 @@ class SlackListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
+	def controller_wiki_edit_after_save(context = { })
+		if Setting.plugin_redmine_slack[:post_wiki_updates] == '1' then return end
+		project = context[:project]
+		page = context[:page]
+
+		user = page.content.author
+		project_url = "<#{object_url project}|#{escape project}>"	
+		page_url = "<#{object_url page}|#{page.title}>"
+		comment = "[#{project_url}] : _Wiki_ Page update by *#{user}*"
+
+		channel = channel_for_project project
+		url = url_for_project project
+
+		attachment = {}
+		attachment[:text] = "Update Page : #{page_url} \n comment : #{page.content.comments}"
+		speak comment, channel, attachment, url
+	end
+	
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_slack[:slack_url] if not url
 		username = Setting.plugin_redmine_slack[:username]
