@@ -146,11 +146,7 @@ private
 			Setting.plugin_redmine_slack[:channel],
 		].find{|v| v.present?}
 
-		if val.to_s.starts_with? '#'
-			val
-		else
-			nil
-		end
+		val
 	end
 
 	def detail_to_field(detail)
