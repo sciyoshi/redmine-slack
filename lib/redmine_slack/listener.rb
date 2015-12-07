@@ -147,17 +147,11 @@ private
 
 		cf = ProjectCustomField.find_by_name("Slack Channel")
 
-		val = [
+		[
 			(proj.custom_value_for(cf).value rescue nil),
 			(channel_for_project proj.parent),
 			Setting.plugin_redmine_slack[:channel],
 		].find{|v| v.present?}
-
-		if val.to_s.starts_with? '#'
-			val
-		else
-			nil
-		end
 	end
 
 	def detail_to_field(detail)
