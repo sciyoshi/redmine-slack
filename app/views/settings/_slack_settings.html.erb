@@ -4,8 +4,12 @@
 </p>
 
 <p>
+	Generate an "Incoming Webhook" URL from the <a href="https://slack.com/apps/build/custom-integration"> Apps configuration page on Slack</a>
+</p>
+
+<p>
 	<label for="settings_channel">Slack Channel</label>
-	<input type="text" id="settings_channel" value="<%= settings['channel'] %>" name="settings[channel]" />
+	<input type="text" id="settings_channel" value="#<%= settings['channel'] %>" name="settings[channel]" />
 </p>
 
 <p>
