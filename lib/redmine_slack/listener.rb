@@ -7,9 +7,6 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url
-		return if issue.is_private?
-
 		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions issue.description}"
 
 		attachment = {}
@@ -34,6 +31,11 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		} if Setting.plugin_redmine_slack[:display_watchers] == 'yes'
 
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		return unless channel and url
+		return if issue.is_private?
+		
 		speak msg, channel, attachment, url
 	end
 
@@ -44,14 +46,16 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
-		return if issue.is_private?
-
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
+		return if issue.is_private?
 
 		speak msg, channel, attachment, url
 	end
@@ -63,9 +67,6 @@ class SlackListener < Redmine::Hook::Listener
 
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
-
-		return unless channel and url and issue.save
-		return if issue.is_private?
 
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
 
@@ -85,6 +86,11 @@ class SlackListener < Redmine::Hook::Listener
 		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{escape changeset.comments}>")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		return unless channel and url and issue.save
+		return if issue.is_private?
+		
 		speak msg, channel, attachment, url
 	end
 
@@ -102,6 +108,49 @@ class SlackListener < Redmine::Hook::Listener
 		params[:channel] = channel if channel
 
 		params[:attachments] = [attachment] if attachment
+
+		if icon and not icon.empty?
+			if icon.start_with? ':'
+				params[:icon_emoji] = icon
+			else
+				params[:icon_url] = icon
+			end
+		end
+
+		begin
+			client = HTTPClient.new
+			client.ssl_config.cert_store.set_default_paths
+			client.ssl_config.ssl_version = "SSLv23"
+			client.post_async url, {:payload => params.to_json}
+		rescue
+			# Bury exception if connection error
+		end
+	end
+	
+	def directSpeak(issue, msg, attachment=nil, url=nil)
+		url = Setting.plugin_redmine_slack[:slack_url] if not url
+		icon = Setting.plugin_redmine_slack[:icon]
+
+		params = {
+			:text => msg,
+			:link_names => 1,
+		}
+		
+		params[:username] = "#{issue.author}"
+		if issue.assigned_to
+			params[:channel] = "@#{issue.assigned_to.login}"
+		else
+			params[:channel] = "@slackbot"
+		end
+
+		if attachment
+			# duplicate 'attachment' to 'localAttache' without 'Assignee' field for direct message
+			localAttache = attachment.dup
+			localAttache[:fields] = []
+			attachment[:fields].each {|x| localAttache[:fields] << x if not x.has_value?(I18n.t("field_assigned_to"))}
+			
+			params[:attachments] = [localAttache]
+		end
 
 		if icon and not icon.empty?
 			if icon.start_with? ':'
