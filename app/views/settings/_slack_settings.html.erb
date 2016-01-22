@@ -40,3 +40,12 @@
 	<label for="settings_post_updates">Post Direct Messages?</label>
 	<input type="checkbox" id="settings_direct_speak" value="1" name="settings[direct_speak]" <%= settings['direct_speak'] == '1' ? 'checked="checked"' : '' %> />
 </p>
+
+<p>
+	<label for="settings_direct_speak_rule">Direct Messages Rule</label>
+	<select id="settings_direct_speak_rule" value="<%= settings['direct_speak_rule'] %>" name="settings[direct_speak_rule]">
+		<option value="ALL" <%= settings['direct_speak_rule'] == 'ALL' ? %q(selected="selected") : '' %>>No filter</option>
+		<option value="Filter1">Send direct post if issue was modified not by assignee user</option>
+		
+	</select>
+</p>
