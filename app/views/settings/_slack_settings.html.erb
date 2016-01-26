@@ -44,8 +44,7 @@
 <p>
 	<label for="settings_direct_speak_rule">Direct Messages Rule</label>
 	<select id="settings_direct_speak_rule" value="<%= settings['direct_speak_rule'] %>" name="settings[direct_speak_rule]">
-		<option value="ALL" <%= settings['direct_speak_rule'] == 'ALL' ? %q(selected="selected") : '' %>>No filter</option>
-		<option value="Filter1">Send direct post if issue was modified not by assignee user</option>
-		
+		<option value="DirectPost_Disabled">Disabled</option>
+		<option value="DirectPost_IgnoreMyActions" <%= settings['direct_speak_rule'] != 'DirectPost_Disabled' ? %q(selected="selected") : '' %>>Send direct post if issue was modified not by assignee user</option>
 	</select>
 </p>

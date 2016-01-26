@@ -131,7 +131,7 @@ class SlackListener < Redmine::Hook::Listener
 			
 		# Filter1. Send direct post if issue was modified not by assignee user
 		if issue.current_journal #if issue is edited
-			(return if issue.assigned_to and issue.current_journal.user.login == issue.assigned_to.login) if Setting.plugin_redmine_slack[:direct_speak_rule] == 'Filter1'
+			(return if issue.assigned_to and issue.current_journal.user.login == issue.assigned_to.login) if Setting.plugin_redmine_slack[:direct_speak_rule] == 'DirectPost_IgnoreMyActions'
 		end
 		
 		url = Setting.plugin_redmine_slack[:slack_url] if not url
