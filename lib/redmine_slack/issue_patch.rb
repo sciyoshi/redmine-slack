@@ -25,7 +25,7 @@ module RedmineSlack
 			def save_from_issue
 				self.reload
 				if not @create_already_fired
-					Redmine::Hook.call_hook(:redmine_slack_issues_edit_after_save, { :issue => self, :journal => self.current_journal})
+					Redmine::Hook.call_hook(:redmine_slack_issues_edit_after_save, { :issue => self, :journal => self.current_journal}) unless self.current_journal.nil?
 				end
 				return true
 			end
