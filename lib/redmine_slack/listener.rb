@@ -264,6 +264,7 @@ private
 	end
 
 	def mentions text
+		return nil if text.nil?
 		names = extract_usernames text
 		names.present? ? "\nTo: " + names.join(', ') : nil
 	end
