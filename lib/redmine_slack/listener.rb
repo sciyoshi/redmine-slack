@@ -155,7 +155,6 @@ class SlackListener < Redmine::Hook::Listener
 			client.ssl_config.ssl_version = :auto
 			client.post_async url, {:payload => params.to_json}
 		rescue Exception => e
-			# Bury exception if connection error
 			logger.warn("cannot connect to #{url}")
 			logger.warn(e)
 		end
