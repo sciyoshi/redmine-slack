@@ -54,6 +54,15 @@ class SlackListener < Redmine::Hook::Listener
 		
 		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
 		
+		# send msg to old user that he was aware of
+		old_user_obj = "nil"
+		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
+		if not old_user_obj == "nil"
+			olduser = User.find(old_user_obj.old_value) rescue nil
+			issue.assigned_to.login = olduser.login
+			directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		end
+		
 		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
 		return if issue.is_private?
 
@@ -87,6 +96,15 @@ class SlackListener < Redmine::Hook::Listener
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		# send msg to old user that he was aware of
+		old_user_obj = "nil"
+		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
+		if not old_user_obj == "nil"
+			olduser = User.find(old_user_obj.old_value) rescue nil
+			issue.assigned_to.login = olduser.login
+			directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		end
 		
 		return unless channel and url and issue.save
 		return if issue.is_private?
@@ -127,7 +145,7 @@ class SlackListener < Redmine::Hook::Listener
 		end
 	end
 	
-	def directSpeak(issue, msg, attachment=nil, url=nil)
+	def directSpeak(issue, msg, attachment=nil, url=nil, full=false)
 			
 		# Filter1. Send direct post if issue was modified not by assignee user
 		if issue.current_journal #if issue is edited
@@ -153,7 +171,7 @@ class SlackListener < Redmine::Hook::Listener
 			# duplicate 'attachment' to 'localAttache' without 'Assignee' field for direct message
 			localAttache = attachment.dup
 			localAttache[:fields] = []
-			attachment[:fields].each {|x| localAttache[:fields] << x if not x.has_value?(I18n.t("field_assigned_to"))}
+			attachment[:fields].each {|x| localAttache[:fields] << x if full or not x.has_value?(I18n.t("field_assigned_to"))}
 			
 			params[:attachments] = [localAttache]
 		end
@@ -227,7 +245,8 @@ private
 
 		short = true
 		value = escape detail.value.to_s
-
+		old_value = "nil"
+		
 		case key
 		when "title", "subject", "description"
 			short = false
@@ -249,9 +268,15 @@ private
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
+			
+			olduser = User.find(detail.old_value) rescue nil
+			old_value = escape olduser.to_s
 		when "fixed_version"
 			version = Version.find(detail.value) rescue nil
 			value = escape version.to_s
+			
+			oldversion = Version.find(detail.old_value) rescue nil
+			old_value = escape oldversion.to_s
 		when "attachment"
 			attachment = Attachment.find(detail.prop_key) rescue nil
 			value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
@@ -264,6 +289,7 @@ private
 
 		result = { :title => title, :value => value }
 		result[:short] = true if short
+		result[:old_value] = old_value
 		result
 	end
 
