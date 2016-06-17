@@ -59,8 +59,10 @@ class SlackListener < Redmine::Hook::Listener
 		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
 		if not old_user_obj == "nil"
 			olduser = User.find(old_user_obj.old_value) rescue nil
-			issue.assigned_to.login = olduser.login
-			directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			if olduser != nil
+				issue.assigned_to = olduser
+				directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			end
 		end
 		
 		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
@@ -102,8 +104,10 @@ class SlackListener < Redmine::Hook::Listener
 		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
 		if not old_user_obj == "nil"
 			olduser = User.find(old_user_obj.old_value) rescue nil
-			issue.assigned_to.login = olduser.login
-			directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			if olduser != nil
+				issue.assigned_to = olduser
+				directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			end
 		end
 		
 		return unless channel and url and issue.save
