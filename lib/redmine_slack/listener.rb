@@ -270,6 +270,10 @@ private
 	end
 
 	def extract_usernames text = ''
+		if text.nil?
+			text = ''
+		end
+
 		# slack usernames may only contain lowercase letters, numbers,
 		# dashes and underscores and must start with a letter or number.
 		text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
