@@ -226,7 +226,6 @@ private
 		short = true
 		value = escape detail.value.to_s
 
-		
 		case key
 		when "title", "subject", "description"
 			short = false
