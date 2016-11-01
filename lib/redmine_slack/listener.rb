@@ -40,6 +40,7 @@ class SlackListener < Redmine::Hook::Listener
 	def controller_issues_edit_after_save(context={})
 		issue = context[:issue]
 		journal = context[:journal]
+		journal.details.delete_if { |x| Setting.plugin_redmine_slack[:exclude_fields].split(",").include? x.prop_key.to_s }
 
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
@@ -225,6 +226,7 @@ private
 		short = true
 		value = escape detail.value.to_s
 
+		
 		case key
 		when "title", "subject", "description"
 			short = false
