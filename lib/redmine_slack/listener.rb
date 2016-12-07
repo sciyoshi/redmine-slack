@@ -211,7 +211,7 @@ private
 
 		# Channel name '-' is reserved for NOT notifying
 		return [] if val.to_s == '-'
-		val.split(",")
+		val.split(",").flatten
 	end
 
 	def detail_to_field(detail)
