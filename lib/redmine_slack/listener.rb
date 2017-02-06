@@ -1,6 +1,11 @@
 require 'httpclient'
 
 class SlackListener < Redmine::Hook::Listener
+
+	def initialize
+		@slack_user_name_custom_field = UserCustomField.find_by_name("Slack Username")
+	end
+
 	def controller_issues_new_after_save(context={})
 		issue = context[:issue]
 
@@ -266,26 +271,27 @@ private
 	end
 
 	def mentions text
-    # @ 付きのRedmineユーザー名リスト
+		# @ 付きのRedmineユーザー名リスト
 		usernames = extract_usernames text
-    return nil if usernames.empty?
+		return nil if usernames.empty?
 
-		cf = UserCustomField.find_by_name("Slack Username")
 		slack_usernames = []
 		usernames.each do |username|
 			# 先頭の @ を除去
 			username.slice!(0)
-			if user = User.find_by_login(username)
-        slack_username = user.custom_value_for(cf).value rescue nil
-        if slack_username.present?
-					slack_usernames << '@' + slack_username
-        end
-        # Slack Username が設定されていない場合は、Slack にメンション飛ばさない。
-				# TODO: プロジェクト毎に Slack ユーザー名を設定できるようにする。
-      end
+			slack_username = find_slack_username username
+			if slack_username.present?
+				slack_usernames << '@' + slack_username
+			end
 		end
 
 		slack_usernames.present? ? "\n" + slack_usernames.join(' ') : nil
+	end
+
+	def find_slack_username redmine_username
+		if user = User.find_by_login(redmine_username)
+			user.custom_value_for(@slack_user_name_custom_field).value rescue nil
+		end
 	end
 
 	def extract_usernames text = ''
