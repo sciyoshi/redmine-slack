@@ -266,8 +266,26 @@ private
 	end
 
 	def mentions text
-		names = extract_usernames text
-		names.present? ? "\nTo: " + names.join(', ') : nil
+    # @ 付きのRedmineユーザー名リスト
+		usernames = extract_usernames text
+    return nil if usernames.empty?
+
+		cf = UserCustomField.find_by_name("Slack Username")
+		slack_usernames = []
+		usernames.each do |username|
+			# 先頭の @ を除去
+			username.slice!(0)
+			if user = User.find_by_login(username)
+        slack_username = user.custom_value_for(cf).value rescue nil
+        if slack_username.present?
+					slack_usernames << '@' + slack_username
+        end
+        # Slack Username が設定されていない場合は、Slack にメンション飛ばさない。
+				# TODO: プロジェクト毎に Slack ユーザー名を設定できるようにする。
+      end
+		end
+
+		slack_usernames.present? ? "\n" + slack_usernames.join(' ') : nil
 	end
 
 	def extract_usernames text = ''
@@ -275,8 +293,6 @@ private
 			text = ''
 		end
 
-		# slack usernames may only contain lowercase letters, numbers,
-		# dashes and underscores and must start with a letter or number.
-		text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
+		text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq
 	end
 end
