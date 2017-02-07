@@ -15,7 +15,8 @@ class SlackListener < Redmine::Hook::Listener
 		return unless channel and url
 		return if issue.is_private?
 
-		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions issue.description}"
+		mentions = build_mentions(issue.assigned_to, issue.description)
+		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions}"
 
 		attachment = {}
 		attachment[:text] = escape issue.description if issue.description
@@ -53,7 +54,9 @@ class SlackListener < Redmine::Hook::Listener
 		return if issue.is_private?
 		return if journal.private_notes?
 
-		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}#change-#{journal.id}|#{escape issue}>#{mentions journal.notes}"
+		assignee_user = get_assignee_user journal
+		mentions = build_mentions(assignee_user, journal.notes)
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}#change-#{journal.id}|#{escape issue}>#{mentions}"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
@@ -270,35 +273,62 @@ private
 		result
 	end
 
-	def mentions text
-		# @ 付きのRedmineユーザー名リスト
-		usernames = extract_usernames text
-		return nil if usernames.empty?
+	def to_slack_usernames(usernames)
+		return [] if usernames.empty?
 
-		slack_usernames = []
-		usernames.each do |username|
-			# 先頭の @ を除去
-			username.slice!(0)
-			slack_username = find_slack_username username
-			if slack_username.present?
-				slack_usernames << '@' + slack_username
-			end
-		end
-
-		slack_usernames.present? ? "\n" + slack_usernames.join(' ') : nil
+		slack_usernames = usernames.map { |username| find_slack_username(username) }
+		slack_usernames.select { |n| n.present? }
 	end
 
-	def find_slack_username redmine_username
-		if user = User.find_by_login(redmine_username)
+	def find_slack_username(redmine_user)
+		return nil if redmine_user.nil?
+
+		if redmine_user.is_a? User
+			user = redmine_user
+		else
+			user = User.find_by_login(redmine_user)
+		end
+
+		if user.present?
 			user.custom_value_for(@slack_user_name_custom_field).value rescue nil
 		end
 	end
 
 	def extract_usernames text = ''
+		# 指定されたテキストから @xxxxx のメンションを抜き出し、ユーザー名(xxxxx の部分のみ)のリストを返します。
 		if text.nil?
 			text = ''
 		end
 
-		text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq
+		text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq.each do |username|
+			# 先頭の @ を除去
+			username.slice!(0)
+		end
+	end
+
+	def get_assignee_user(journal)
+		assignee_detail = journal.details.find do |detail|
+			detail.prop_key.to_s.sub('_id', '') == 'assigned_to'
+		end
+		if assignee_detail.present?
+			User.find(assignee_detail.value) rescue nil
+		end
+	end
+
+	def build_mentions(assignee_user, text)
+		# 担当者の Redmine User インスタンスを取得
+		assignee_slack_username = find_slack_username(assignee_user)
+
+		# コメントからメンションされた Redmine ユーザー名リストを取得
+		mentioned_usernames = extract_usernames text
+		slack_usernames = to_slack_usernames mentioned_usernames
+
+		if assignee_slack_username.present?
+			slack_usernames << assignee_slack_username
+		end
+
+		# メンションする Slack ユーザー名リスト
+		slack_usernames = slack_usernames.uniq.map { |name| '@' + name }
+		slack_usernames.present? ? "\n" + slack_usernames.join(' ') : nil
 	end
 end
