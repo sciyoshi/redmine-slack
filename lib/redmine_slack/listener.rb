@@ -15,7 +15,7 @@ class SlackListener < Redmine::Hook::Listener
 		return unless channel and url
 		return if issue.is_private?
 
-		mentions = build_mentions(issue.assigned_to, issue.description)
+		mentions = build_mentions(issue.assigned_to, issue.description, issue.project.identifier)
 		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions}"
 
 		attachment = {}
@@ -55,7 +55,7 @@ class SlackListener < Redmine::Hook::Listener
 		return if journal.private_notes?
 
 		assignee_user = get_assignee_user journal
-		mentions = build_mentions(assignee_user, journal.notes)
+		mentions = build_mentions(assignee_user, journal.notes, issue.project.identifier)
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}#change-#{journal.id}|#{escape issue}>#{mentions}"
 
 		attachment = {}
@@ -273,14 +273,14 @@ private
 		result
 	end
 
-	def to_slack_usernames(usernames)
+	def to_slack_usernames(usernames, project_id)
 		return [] if usernames.empty?
 
-		slack_usernames = usernames.map { |username| find_slack_username(username) }
+		slack_usernames = usernames.map { |username| find_slack_username(username, project_id) }
 		slack_usernames.select { |n| n.present? }
 	end
 
-	def find_slack_username(redmine_user)
+	def find_slack_username(redmine_user, project_id)
 		return nil if redmine_user.nil?
 
 		if redmine_user.is_a? User
@@ -290,7 +290,29 @@ private
 		end
 
 		if user.present?
-			user.custom_value_for(@slack_user_name_custom_field).value rescue nil
+			val = user.custom_value_for(@slack_user_name_custom_field).value rescue nil
+			if val.nil?
+				return val
+			end
+
+			result = nil
+			slack_usernames = val.split(/\s?,\s*/)
+			slack_usernames.each { |n|
+				if n.include? ':'
+					proj_id, slack_username = n.split(':')
+					if project_id == proj_id
+						if slack_username != '-'
+							result = slack_username
+						else
+							result = nil
+						end
+						break
+					end
+				elsif n != '-'
+					result = n
+				end
+			}
+			result
 		end
 	end
 
@@ -315,13 +337,13 @@ private
 		end
 	end
 
-	def build_mentions(assignee_user, text)
+	def build_mentions(assignee_user, text, project_id)
 		# 担当者の Redmine User インスタンスを取得
-		assignee_slack_username = find_slack_username(assignee_user)
+		assignee_slack_username = find_slack_username(assignee_user, project_id)
 
 		# コメントからメンションされた Redmine ユーザー名リストを取得
 		mentioned_usernames = extract_usernames text
-		slack_usernames = to_slack_usernames mentioned_usernames
+		slack_usernames = to_slack_usernames(mentioned_usernames, project_id)
 
 		if assignee_slack_username.present?
 			slack_usernames << assignee_slack_username
