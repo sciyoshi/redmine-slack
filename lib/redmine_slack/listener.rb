@@ -317,13 +317,14 @@ private
 	end
 
 	def extract_usernames text = ''
-		# 指定されたテキストから @xxxxx のメンションを抜き出し、ユーザー名(xxxxx の部分のみ)のリストを返します。
+		# Extracts the @xxxxx from the given text and returns a list of usernames (only xxxxx parts)
+
 		if text.nil?
 			text = ''
 		end
 
 		text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq.each do |username|
-			# 先頭の @ を除去
+			# Remove the leading @
 			username.slice!(0)
 		end
 	end
@@ -338,10 +339,10 @@ private
 	end
 
 	def build_mentions(assignee_user, text, project_id)
-		# 担当者の Redmine User インスタンスを取得
+		# Get the assignee's Redmine User instance
 		assignee_slack_username = find_slack_username(assignee_user, project_id)
 
-		# コメントからメンションされた Redmine ユーザー名リストを取得
+		# Retrieve the mentioned Redmine usernames from the given text
 		mentioned_usernames = extract_usernames text
 		slack_usernames = to_slack_usernames(mentioned_usernames, project_id)
 
@@ -349,7 +350,7 @@ private
 			slack_usernames << assignee_slack_username
 		end
 
-		# メンションする Slack ユーザー名リスト
+		# Slack usernames to be mentioned
 		slack_usernames = slack_usernames.uniq.map { |name| '@' + name }
 		slack_usernames.present? ? "\n" + slack_usernames.join(' ') : nil
 	end
