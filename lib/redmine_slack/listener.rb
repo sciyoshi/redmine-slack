@@ -3,7 +3,7 @@ require 'httpclient'
 class SlackListener < Redmine::Hook::Listener
 
 	def initialize
-		@slack_user_name_custom_field = UserCustomField.find_by_name("Slack Username")
+		@slack_username_custom_field = UserCustomField.find_by_name("Slack Username")
 	end
 
 	def controller_issues_new_after_save(context={})
@@ -290,7 +290,7 @@ private
 		end
 
 		if user.present?
-			val = user.custom_value_for(@slack_user_name_custom_field).value rescue nil
+			val = user.custom_value_for(@slack_username_custom_field).value rescue nil
 			if val.nil?
 				return val
 			end
