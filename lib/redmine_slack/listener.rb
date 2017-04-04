@@ -220,7 +220,11 @@ private
 			title = I18n.t :label_attachment
 		else
 			key = detail.prop_key.to_s.sub("_id", "")
-			title = I18n.t "field_#{key}"
+			if key == "parent"
+				title = I18n.t "field_#{key}_issue"
+			else
+				title = I18n.t "field_#{key}"
+			end
 		end
 
 		short = true
