@@ -44,7 +44,7 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
+		return unless channel and url and (Setting.plugin_redmine_slack[:post_updates] == '1' or ( Setting.plugin_redmine_slack[:post_closed] == '1' and issue.status.is_closed ) )
 		return if issue.is_private?
 		return if journal.private_notes?
 
