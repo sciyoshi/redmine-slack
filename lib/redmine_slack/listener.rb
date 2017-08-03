@@ -32,7 +32,7 @@ class SlackListener < Redmine::Hook::Listener
 			:title => I18n.t("field_watcher"),
 			:value => escape(issue.watcher_users.join(', ')),
 			:short => true
-		} if Setting.plugin_redmine_slack[:display_watchers] == 'yes'
+		} if Setting.plugin_redmine_slack['display_watchers'] == 'yes'
 
 		speak msg, channel, attachment, url
 	end
@@ -44,7 +44,7 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
+		return unless channel and url and Setting.plugin_redmine_slack['post_updates'] == '1'
 		return if issue.is_private?
 		return if journal.private_notes?
 
@@ -105,7 +105,7 @@ class SlackListener < Redmine::Hook::Listener
 	end
 
 	def controller_wiki_edit_after_save(context = { })
-		return unless Setting.plugin_redmine_slack[:post_wiki_updates] == '1'
+		return unless Setting.plugin_redmine_slack['post_wiki_updates'] == '1'
 
 		project = context[:project]
 		page = context[:page]
@@ -128,9 +128,9 @@ class SlackListener < Redmine::Hook::Listener
 	end
 
 	def speak(msg, channel, attachment=nil, url=nil)
-		url = Setting.plugin_redmine_slack[:slack_url] if not url
-		username = Setting.plugin_redmine_slack[:username]
-		icon = Setting.plugin_redmine_slack[:icon]
+		url = Setting.plugin_redmine_slack['slack_url'] if not url
+		username = Setting.plugin_redmine_slack['username']
+		icon = Setting.plugin_redmine_slack['icon']
 
 		params = {
 			:text => msg,
@@ -191,7 +191,7 @@ private
 		return [
 			(proj.custom_value_for(cf).value rescue nil),
 			(url_for_project proj.parent),
-			Setting.plugin_redmine_slack[:slack_url],
+			Setting.plugin_redmine_slack['slack_url'],
 		].find{|v| v.present?}
 	end
 
@@ -203,7 +203,7 @@ private
 		val = [
 			(proj.custom_value_for(cf).value rescue nil),
 			(channel_for_project proj.parent),
-			Setting.plugin_redmine_slack[:channel],
+			Setting.plugin_redmine_slack['channel'],
 		].find{|v| v.present?}
 
 		# Channel name '-' is reserved for NOT notifying
