@@ -44,3 +44,15 @@
 	<label for="settings_post_wiki_updates">Post Wiki Updates?</label>
 	<input type="checkbox" id="settings_post_wiki_updates" value="1" name="settings[post_wiki_updates]" <%= settings['post_wiki_updates'] == '1' ? 'checked="checked"' : '' %> />
 </p>
+<p>
+	<label for="settings_post_updates">Post Direct Messages?</label>
+	<input type="checkbox" id="settings_direct_speak" value="1" name="settings[direct_speak]" <%= settings['direct_speak'] == '1' ? 'checked="checked"' : '' %> />
+</p>
+
+<p>
+	<label for="settings_direct_speak_rule">Direct Messages Rule</label>
+	<select id="settings_direct_speak_rule" value="<%= settings['direct_speak_rule'] %>" name="settings[direct_speak_rule]">
+		<option value="DirectPost_Disabled">Disabled</option>
+		<option value="DirectPost_IgnoreMyActions" <%= settings['direct_speak_rule'] != 'DirectPost_Disabled' ? %q(selected="selected") : '' %>>Send direct post if issue was modified not by assignee user</option>
+	</select>
+</p>

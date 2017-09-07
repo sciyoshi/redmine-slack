@@ -7,9 +7,6 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url
-		return if issue.is_private?
-
 		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions issue.description}"
 
 		attachment = {}
@@ -34,6 +31,11 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		} if Setting.plugin_redmine_slack['display_watchers'] == 'yes'
 
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+
+		return unless channel and url
+		return if issue.is_private?
+
 		speak msg, channel, attachment, url
 	end
 
@@ -44,15 +46,28 @@ class SlackListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url and Setting.plugin_redmine_slack['post_updates'] == '1'
-		return if issue.is_private?
-		return if journal.private_notes?
-
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		# send msg to old user that he was aware of
+		old_user_obj = "nil"
+		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
+		if not old_user_obj == "nil"
+			olduser = User.find(old_user_obj.old_value) rescue nil
+			if olduser != nil
+				issue.assigned_to = olduser
+				directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			end
+		end
+
+		return unless channel and url and Setting.plugin_redmine_slack['post_updates'] == '1'
+		return if issue.is_private?
+		return if journal.private_notes?
 
 		speak msg, channel, attachment, url
 	end
@@ -64,9 +79,6 @@ class SlackListener < Redmine::Hook::Listener
 
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
-
-		return unless channel and url and issue.save
-		return if issue.is_private?
 
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
 
@@ -100,6 +112,22 @@ class SlackListener < Redmine::Hook::Listener
 		attachment = {}
 		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{escape changeset.comments}>")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		
+		directSpeak issue, msg, attachment, url if Setting.plugin_redmine_slack[:direct_speak] == '1'
+		
+		# send msg to old user that he was aware of
+		old_user_obj = "nil"
+		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
+		if not old_user_obj == "nil"
+			olduser = User.find(old_user_obj.old_value) rescue nil
+			if olduser != nil
+				issue.assigned_to = olduser
+				directSpeak issue, msg, attachment, url, true if Setting.plugin_redmine_slack[:direct_speak] == '1'
+			end
+		end
+		
+		return unless channel and url and issue.save
+		return if issue.is_private?
 
 		speak msg, channel, attachment, url
 	end
@@ -158,6 +186,55 @@ class SlackListener < Redmine::Hook::Listener
 		rescue Exception => e
 			Rails.logger.warn("cannot connect to #{url}")
 			Rails.logger.warn(e)
+		end
+	end
+	
+	def directSpeak(issue, msg, attachment=nil, url=nil, full=false)
+			
+		# Filter1. Send direct post if issue was modified not by assignee user
+		if issue.current_journal #if issue is edited
+			(return if issue.assigned_to and issue.current_journal.user.login == issue.assigned_to.login) if Setting.plugin_redmine_slack[:direct_speak_rule] == 'DirectPost_IgnoreMyActions'
+		end
+		
+		url = Setting.plugin_redmine_slack[:slack_url] if not url
+		icon = Setting.plugin_redmine_slack[:icon]
+
+		params = {
+			:text => msg,
+			:link_names => 1,
+		}
+		
+		params[:username] = "#{issue.author}"
+		if issue.assigned_to
+			params[:channel] = "@#{issue.assigned_to.login}"
+		else
+			params[:channel] = "@slackbot"
+		end
+
+		if attachment
+			# duplicate 'attachment' to 'localAttache' without 'Assignee' field for direct message
+			localAttache = attachment.dup
+			localAttache[:fields] = []
+			attachment[:fields].each {|x| localAttache[:fields] << x if full or not x.has_value?(I18n.t("field_assigned_to"))}
+			
+			params[:attachments] = [localAttache]
+		end
+
+		if icon and not icon.empty?
+			if icon.start_with? ':'
+				params[:icon_emoji] = icon
+			else
+				params[:icon_url] = icon
+			end
+		end
+
+		begin
+			client = HTTPClient.new
+			client.ssl_config.cert_store.set_default_paths
+			client.ssl_config.ssl_version = "SSLv23"
+			client.post_async url, {:payload => params.to_json}
+		rescue
+			# Bury exception if connection error
 		end
 	end
 
@@ -229,6 +306,7 @@ private
 
 		short = true
 		value = escape detail.value.to_s
+		old_value = "nil"
 
 		case key
 		when "title", "subject", "description"
@@ -251,9 +329,15 @@ private
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
 			value = escape user.to_s
+
+			olduser = User.find(detail.old_value) rescue nil
+			old_value = escape olduser.to_s
 		when "fixed_version"
 			version = Version.find(detail.value) rescue nil
 			value = escape version.to_s
+
+			oldversion = Version.find(detail.old_value) rescue nil
+			old_value = escape oldversion.to_s
 		when "attachment"
 			attachment = Attachment.find(detail.prop_key) rescue nil
 			value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
@@ -266,6 +350,7 @@ private
 
 		result = { :title => title, :value => value }
 		result[:short] = true if short
+		result[:old_value] = old_value
 		result
 	end
 
