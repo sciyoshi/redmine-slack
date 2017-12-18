@@ -38,6 +38,66 @@
 <p>
 	<label for="settings_post_updates">Post Issue Updates?</label>
 	<input type="checkbox" id="settings_post_updates" value="1" name="settings[post_updates]" <%= settings['post_updates'] == '1' ? 'checked="checked"' : '' %> />
+
+	<fieldset>
+		<legend>Post only when the following properties have been changed.</legend>
+		<p>
+			<label for="settings_post_updates_project">Project</label>
+			<input type="checkbox" id="settings_post_updates_project_id" value="1" name="settings[post_updates_standard_fields][project_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['project_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_tracker">Tracker</label>
+			<input type="checkbox" id="settings_post_updates_tracker_id" value="1" name="settings[post_updates_standard_fields][tracker_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['tracker_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_subject">Subject</label>
+			<input type="checkbox" id="settings_post_updates_subject" value="1" name="settings[post_updates_standard_fields][subject]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['subject'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_description">Description</label>
+			<input type="checkbox" id="settings_post_updates_description" value="1" name="settings[post_updates_standard_fields][description]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['description'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_status">Status</label>
+			<input type="checkbox" id="settings_post_updates_status_id" value="1" name="settings[post_updates_standard_fields][status_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['status_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_priority">Priority</label>
+			<input type="checkbox" id="settings_post_updates_priority_id" value="1" name="settings[post_updates_standard_fields][priority_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['priority_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_assignee">Assignee</label>
+			<input type="checkbox" id="settings_post_updates_assigned_to_id" value="1" name="settings[post_updates_standard_fields][assigned_to_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['assigned_to_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_category">Category</label>
+			<input type="checkbox" id="settings_post_updates_category_id" value="1" name="settings[post_updates_standard_fields][category_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['category_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_target_version">Target version</label>
+			<input type="checkbox" id="settings_post_updates_fixed_version_id" value="1" name="settings[post_updates_standard_fields][fixed_version_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['fixed_version_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_parent_task">Parent task</label>
+			<input type="checkbox" id="settings_post_updates_parent_issue_id" value="1" name="settings[post_updates_standard_fields][parent_issue_id]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['parent_issue_id'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_start_date">Start Date</label>
+			<input type="checkbox" id="settings_post_updates_start_date" value="1" name="settings[post_updates_standard_fields][start_date]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['start_date'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_end_date">End Date</label>
+			<input type="checkbox" id="settings_post_updates_due_date" value="1" name="settings[post_updates_standard_fields][due_date]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['due_date'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_done_ratio">% Done</label>
+			<input type="checkbox" id="settings_post_updates_done_ratio" value="1" name="settings[post_updates_standard_fields][done_ratio]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['done_ratio'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+		<p>
+			<label for="settings_post_updates_estimated_hours">Estimated time</label>
+			<input type="checkbox" id="settings_post_updates_estimated_hours" value="1" name="settings[post_updates_standard_fields][estimated_hours]" <%= settings['post_updates_standard_fields'] and settings['post_updates_standard_fields']['estimated_hours'] == '1' ? 'checked="checked"' : '' %> />
+		</p>
+	</fieldset>
 </p>
 
 <p>

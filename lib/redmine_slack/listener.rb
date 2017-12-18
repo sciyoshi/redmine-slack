@@ -54,10 +54,10 @@ class SlackListener < Redmine::Hook::Listener
 		return if issue.is_private?
 		return if journal.private_notes?
 
-		if original_issue
-			keys = [:assigned_to_id, :priority_id, :status_id]
-			return unless keys.map { |k|
-			  original_issue[k] == issue[k]
+		fields = Setting.plugin_redmine_slack['post_updates_standard_fields']
+		if original_issue and !fields.nil?
+			return unless fields.collect { |k, v|
+				v == '0' or original_issue[k.to_sym] == issue[k.to_sym]
 			}.include?(false)
 		end
 
