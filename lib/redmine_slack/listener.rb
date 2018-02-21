@@ -67,11 +67,10 @@ class SlackListener < Redmine::Hook::Listener
 		old_user_obj = "nil"
 		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
 		if not old_user_obj == "nil"
-			olduser_id = User.find(old_user_obj.old_value) rescue nil
-			olduser = User.find(olduser_id)
+			olduser = User.find(old_user_obj.old_value) rescue nil
 			if olduser != nil
 				assigned_slack_username = get_slack_username olduser
-				directSpeak issue, msg, assigned_slack_username, attachment, url, true if assigned_slack_username and Setting.plugin_redmine_slack['direct_speak'] == '1'
+				directSpeak issue, msg, assigned_slack_username, attachment, url, true, olduser.login if assigned_slack_username and Setting.plugin_redmine_slack['direct_speak'] == '1'
 			end
 		end
 
@@ -130,12 +129,13 @@ class SlackListener < Redmine::Hook::Listener
 		directSpeak issue, msg, assigned_slack_username, attachment, url if assigned_slack_username and Setting.plugin_redmine_slack['direct_speak'] == '1'
 
 		# send msg to old user that he was aware of
+		old_user_obj = "nil"
+		journal.details.map { |d| old_user_obj = d if d.prop_key == "assigned_to_id" }
 		if not old_user_obj == "nil"
-			olduser_id = User.find(old_user_obj.old_value) rescue nil
-			olduser = User.find(olduser_id)
+			olduser = User.find(old_user_obj.old_value) rescue nil
 			if olduser != nil
 				assigned_slack_username = get_slack_username olduser
-				directSpeak issue, msg, assigned_slack_username, attachment, url, true if assigned_slack_username and Setting.plugin_redmine_slack['direct_speak'] == '1'
+				directSpeak issue, msg, assigned_slack_username, attachment, url, true, olduser.login if assigned_slack_username and Setting.plugin_redmine_slack['direct_speak'] == '1'
 			end
 		end
 
@@ -202,11 +202,12 @@ class SlackListener < Redmine::Hook::Listener
 		end
 	end
 
-    def directSpeak(issue, msg, slack_username, attachment=nil, url=nil, full=false)
+    def directSpeak(issue, msg, slack_username, attachment=nil, url=nil, full=false, olduser_login=nil)
 
         # Filter1. Send direct post if issue was modified not by assignee user
         if issue.current_journal #if issue is edited
-            (return if issue.current_journal.user.login == issue.assigned_to.login) if Setting.plugin_redmine_slack['direct_speak_rule'] == 'DirectPost_IgnoreMyActions'
+            (return if issue.current_journal.user.login == issue.assigned_to.login or issue.current_journal.user.login == olduser_login) if Setting.plugin_redmine_slack['direct_speak_rule'] == 'DirectPost_IgnoreMyActions'
+
         end
 
         url = Setting.plugin_redmine_slack['slack_url'] if not url
