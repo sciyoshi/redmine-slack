@@ -112,7 +112,7 @@ class SlackListener < Redmine::Hook::Listener
 
 		user = message.author
 		project_url = "<#{object_url project}|#{escape project}>"
-		message_url = "<#{object_url message}|#{message.subject}>"
+		message_url = "<#{object_url message}|#{escape message.subject}>"
 		comment = "[#{project_url}] #{message_url} updated by *#{user}*"
 
 		channel = channel_for_project project
@@ -132,7 +132,7 @@ class SlackListener < Redmine::Hook::Listener
 
 		user = message.author
 		project_url = "<#{object_url project}|#{escape project}>"
-		message_url = "<#{object_url message}|#{message.subject}>"
+		message_url = "<#{object_url message}|#{escape message.subject}>"
 		comment = "[#{project_url}] #{message_url} updated by *#{user}*"
 
 		channel = channel_for_project project
