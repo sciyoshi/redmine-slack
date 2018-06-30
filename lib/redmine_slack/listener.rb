@@ -217,7 +217,7 @@ private
       custom_field = detail.custom_field
       key = custom_field.name
 			title = key
-      value = IssuesController.helpers.format_value(detail.value, custom_field) if detail.value
+      value = (detail.value)? IssuesController.helpers.format_value(detail.value, custom_field) : ""
     when "attachment"
 			key = "attachment"
 			title = I18n.t :label_attachment
