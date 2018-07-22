@@ -212,16 +212,16 @@ private
 	end
 
 	def detail_to_field(detail)
-    case detail.property
-    when "cf"
-      custom_field = detail.custom_field
-      key = custom_field.name
+		case detail.property
+		when "cf"
+			custom_field = detail.custom_field
+			key = custom_field.name
 			title = key
-      value = (detail.value)? IssuesController.helpers.format_value(detail.value, custom_field) : ""
-    when "attachment"
+			value = (detail.value)? IssuesController.helpers.format_value(detail.value, custom_field) : ""
+		when "attachment"
 			key = "attachment"
 			title = I18n.t :label_attachment
-      value = escape detail.value.to_s
+			value = escape detail.value.to_s
 		else
 			key = detail.prop_key.to_s.sub("_id", "")
 			if key == "parent"
@@ -229,7 +229,7 @@ private
 			else
 				title = I18n.t "field_#{key}"
 			end
-      value = escape detail.value.to_s
+			value = escape detail.value.to_s
 		end
 
 		short = true
