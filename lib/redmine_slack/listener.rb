@@ -19,11 +19,12 @@ class SlackListener < Redmine::Hook::Listener
 			:title => I18n.t("field_priority"),
 			:value => escape(issue.priority.to_s),
 			:short => true
-		}, {
-			:title => I18n.t("field_assigned_to"),
-			:value => escape("@"+issue.assigned_to.login) if issue.assigned_to,
-			:short => true
 		}]
+		attachment[:fields] << {
+			:title => I18n.t("field_assigned_to"),
+			:value => escape("@"+issue.assigned_to.login),
+			:short => true
+		} if issue.assigned_to
 
 		attachment[:fields] << {
 			:title => I18n.t("field_watcher"),
