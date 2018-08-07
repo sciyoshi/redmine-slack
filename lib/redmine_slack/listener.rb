@@ -21,7 +21,7 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		}, {
 			:title => I18n.t("field_assigned_to"),
-			:value => escape(issue.assigned_to.to_s),
+			:value => escape("@"+issue.assigned_to.login),
 			:short => true
 		}]
 
@@ -328,7 +328,7 @@ private
 			value = escape category.to_s
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
-			value = escape user.to_s
+			value = escape user.login
 
 			olduser = User.find(detail.old_value) rescue nil
 			old_value = escape olduser.to_s
