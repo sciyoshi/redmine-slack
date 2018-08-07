@@ -21,7 +21,7 @@ class SlackListener < Redmine::Hook::Listener
 			:short => true
 		}, {
 			:title => I18n.t("field_assigned_to"),
-			:value => escape("@"+issue.assigned_to.login),
+			:value => escape("@"+(issue.assigned_to.nil?"":issue.assigned_to.login)),
 			:short => true
 		}]
 
