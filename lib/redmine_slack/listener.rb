@@ -114,6 +114,9 @@ class SlackListener < Redmine::Hook::Listener
 		project_url = "<#{object_url project}|#{escape project}>"
 		page_url = "<#{object_url page}|#{page.title}>"
 		comment = "[#{project_url}] #{page_url} updated by *#{user}*"
+		if page.content.version > 1
+			comment << " [<#{object_url page}/diff?version=#{page.content.version}|difference>]"
+		end
 
 		channel = channel_for_project project
 		url = url_for_project project
