@@ -23,7 +23,7 @@ Redmine::Plugin.register :redmine_slack do
 		:partial => 'settings/slack_settings'
 end
 
-ActionDispatch::Callbacks.to_prepare do
+((Rails.version > "5")? ActiveSupport::Reloader : ActionDispatch::Callbacks).to_prepare do
 	require_dependency 'issue'
 	unless Issue.included_modules.include? RedmineSlack::IssuePatch
 		Issue.send(:include, RedmineSlack::IssuePatch)
