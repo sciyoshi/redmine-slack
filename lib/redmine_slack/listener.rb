@@ -57,6 +57,25 @@ class SlackListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
+	def controller_agile_boards_update_after_save(context={})
+		issue = context[:issue]
+		journal = issue.journals.last
+
+		channel = channel_for_project issue.project
+		url = url_for_project issue.project
+
+		return unless channel and url and Setting.plugin_redmine_slack[:post_updates] == '1'
+		return if issue.is_private?
+
+		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
+
+		attachment = {}
+		attachment[:text] = escape journal.notes if journal.notes
+		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+
+		speak msg, channel, attachment, url
+	end
+
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
 		issue = context[:issue]
 		journal = issue.current_journal
