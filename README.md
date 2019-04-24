@@ -24,6 +24,10 @@ Restart Redmine, and you should see the plugin show up in the Plugins page.
 Under the configuration options, set the Slack API URL to the URL for an
 Incoming WebHook integration in your Slack account.
 
+## @mentions
+
+You can create a user custom field named "Slack Username". It will trigger a notification if a user has its Slack username in the custom field.
+
 ## Customized Routing
 
 You can also route messages to different channels on a per-project basis. To
