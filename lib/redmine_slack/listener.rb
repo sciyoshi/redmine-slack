@@ -289,6 +289,6 @@ private
 
 		# slack usernames may only contain lowercase letters, numbers,
 		# dashes and underscores and must start with a letter or number.
-		text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
+		text.scan(/@[a-z0-9][a-z0-9_\-\.]*/).uniq
 	end
 end
