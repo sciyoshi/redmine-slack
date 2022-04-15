@@ -1,6 +1,6 @@
 require 'redmine'
 
-require_dependency 'redmine_slack/listener'
+require File.expand_path('../lib/redmine_slack/listener', __FILE__)
 
 Redmine::Plugin.register :redmine_slack do
 	name 'Redmine Slack'
