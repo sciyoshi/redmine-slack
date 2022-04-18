@@ -1,6 +1,7 @@
 require 'httpclient'
 
-class SlackListener < Redmine::Hook::Listener
+module RedmineSlack
+class Listener < Redmine::Hook::Listener
 	def redmine_slack_issues_new_after_save(context={})
 		issue = context[:issue]
 
@@ -291,4 +292,5 @@ private
 		# dashes and underscores and must start with a letter or number.
 		text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
 	end
+end
 end
