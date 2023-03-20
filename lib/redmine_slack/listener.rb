@@ -121,6 +121,8 @@ class Listener < Redmine::Hook::Listener
 
 		channel = channel_for_project project
 		url = url_for_project project
+		
+		return unless channel and url
 
 		attachment = nil
 		if not page.content.comments.empty?
