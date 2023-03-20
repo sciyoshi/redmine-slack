@@ -105,6 +105,46 @@ class Listener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
+	def controller_messages_new_after_save(context = { })
+		return unless Setting.plugin_redmine_slack['post_message_updates'] == '1'
+
+		project = context[:project]
+		message = context[:message]
+
+		user = message.author
+		project_url = "<#{object_url project}|#{escape project}>"
+		message_url = "<#{object_url message}|#{escape message.subject}>"
+		comment = "[#{project_url}] #{message_url} updated by *#{user}*"
+
+		channel = channel_for_project project
+		url = url_for_project project
+
+		attachment = {}
+		attachment[:text] = "#{escape message.content}"
+
+		speak comment, channel, attachment, url
+	end
+
+	def controller_messages_reply_after_save(context = { })
+		return unless Setting.plugin_redmine_slack['post_message_updates'] == '1'
+
+		project = context[:project]
+		message = context[:message]
+
+		user = message.author
+		project_url = "<#{object_url project}|#{escape project}>"
+		message_url = "<#{object_url message}|#{escape message.subject}>"
+		comment = "[#{project_url}] #{message_url} updated by *#{user}*"
+
+		channel = channel_for_project project
+		url = url_for_project project
+
+		attachment = {}
+		attachment[:text] = "#{escape message.content}"
+
+		speak comment, channel, attachment, url
+	end
+
 	def controller_wiki_edit_after_save(context = { })
 		return unless Setting.plugin_redmine_slack['post_wiki_updates'] == '1'
 
