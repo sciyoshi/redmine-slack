@@ -38,16 +38,29 @@ class Listener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
+	def controller_issues_edit_before_save(context={})
+		original = Issue.find(context[:issue][:id])
+		context[:params][:original_issue] = original if original
+	end
+
 	def redmine_slack_issues_edit_after_save(context={})
 		issue = context[:issue]
 		journal = context[:journal]
 
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
+		original_issue = context[:params][:original_issue]
 
 		return unless channel and url and Setting.plugin_redmine_slack['post_updates'] == '1'
 		return if issue.is_private?
 		return if journal.private_notes?
+
+		fields = Setting.plugin_redmine_slack['post_updates_standard_fields']
+		if original_issue and !fields.nil?
+			return unless fields.collect { |k, v|
+				v == '0' or original_issue[k.to_sym] == issue[k.to_sym]
+			}.include?(false)
+		end
 
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
 
