@@ -1,4 +1,5 @@
 require 'httpclient'
+require 'sanitize'
 
 module RedmineSlack
 class Listener < Redmine::Hook::Listener
@@ -170,6 +171,7 @@ class Listener < Redmine::Hook::Listener
 private
 	def escape(msg)
 		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
+		Sanitize.clean(msg)
 	end
 
 	def object_url(obj)
