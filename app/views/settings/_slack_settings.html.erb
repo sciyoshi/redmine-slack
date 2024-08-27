@@ -44,3 +44,10 @@
 	<label for="settings_post_wiki_updates">Post Wiki Updates?</label>
 	<input type="checkbox" id="settings_post_wiki_updates" value="1" name="settings[post_wiki_updates]" <%= settings['post_wiki_updates'] == '1' ? 'checked="checked"' : '' %> />
 </p>
+<p>
+        <label for="settings_exclude_fields">Exclude Fields</label>
+	<textarea id="settings_exclude_fields" name="settings[exclude_fields]"><%= settings['exclude_fields'] %></textarea>
+</p>
+<p>
+	Comma-separated values. Field names or custom field id. For example: due_date,1,2
+</p>
