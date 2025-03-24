@@ -25,7 +25,7 @@ class Listener < Redmine::Hook::Listener
 			:short => true
 		}, {
 			:title => I18n.t("field_assigned_to"),
-			:value => escape(issue.assigned_to.to_s),
+			:value => "@#{escape(User.find(issue.assigned_to).custom_field_value(UserCustomField.find_by_name("Slack Username")).to_s) if issue.assigned_to} #{escape issue.assigned_to.to_s}",
 			:short => true
 		}]
 
@@ -260,7 +260,7 @@ private
 			value = escape category.to_s
 		when "assigned_to"
 			user = User.find(detail.value) rescue nil
-			value = escape user.to_s
+            value = "@#{escape user.custom_field_value(UserCustomField.find_by_name("Slack Username")) if user} #{escape user.to_s}"
 		when "fixed_version"
 			version = Version.find(detail.value) rescue nil
 			value = escape version.to_s
