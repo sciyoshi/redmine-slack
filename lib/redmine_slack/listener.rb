@@ -272,7 +272,15 @@ private
 			value = "<#{object_url issue}|#{escape issue}>" if issue
 		end
 
-		value = "-" if value.empty?
+		value = if value.empty?
+			"-"
+		elsif value.count("\n") >= 5
+			value.split("\n")[0,5].join("\n") + '...'
+		elsif value.length > 100
+			value[0,97] + '...'
+		else
+			value
+		end
 
 		result = { :title => title, :value => value }
 		result[:short] = true if short
